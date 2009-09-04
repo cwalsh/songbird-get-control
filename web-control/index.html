@@ -17,12 +17,9 @@
 			Notes: I had a problem with my browser caching my AJAX requests and only executing them once.
 			As a quick fix, I just added a random number to the URL so that the browser thinks that it 
 			is a new unique request.  If anyone has any ideas, let me know.  Thanks.
-		*/	
+		*/
 		function ajaxFunction( theEvent )
 		{
-			//The debug variable, set to false if you don't want to know what is happening
-			var showDebug = true;
-
 			//Set up AJAX Object
 			var xmlHTTP;
 
@@ -30,11 +27,30 @@
 			var randNumSeed1 = Math.floor( Math.random() * 12 );
 			var randNumSeed2 = Math.floor( Math.random() * 17 );
 			var randNum = ( randNumSeed1 + Math.floor( Math.random() * 13 ) ) * randNumSeed2;
+			var ctl_relay;
 
-			//Set up the computer address
-			//**********************
-			//Replace "boosh" with your computer's address
-			var compAddr = "http://boosh:50136/";
+			//********************** (configuration) *********************/
+
+			//Replace "localhost" with your computer's address (hostname or IP address)
+			var machineName = "localhost";
+			var port = 50136;
+			ctl_relay = null;
+			// uncomment the following line if you are running control.php to get around cross-domain access rules:
+			ctl_relay = "control.php";
+
+			//The debug variable, set to false if you don't want to know what is happening
+			var showDebug = true;
+
+			//********************** (end of configuration) *********************/
+
+
+
+			var requestPrefix;
+			if(ctl_relay != null) {
+				requestPrefix = ctl_relay + "?ctlEvent=";
+			} else {
+				requestPrefix = "http://" + machineName + ":" + port + "/";
+			}
 
 			//Check for browser issues
 			if( window.XMLHttpRequest )
@@ -50,7 +66,7 @@
 			else
 			{
 				//It isn't working for some reason
-			  	alert( "Sorry, your browser does not support the AJAX object that we need to function." );
+				alert( "Sorry, your browser does not support the AJAX object that we need to function." );
 			}
 			
 			//Set up return function
@@ -85,8 +101,7 @@
 	</div>
 	<p>
 
-	<!-- BEGIN MEDIA CONTROL BUTTONS - 
-	For anyone wishing to use this, all you need to do is change "boosh" in control.php to your own computer network name-->
+	<!-- BEGIN MEDIA CONTROL BUTTONS -->
 
 	<div class="nextprev">
 		<a href="#" onClick="ajaxFunction( 'prev' );"><img src="images/previous.png" alt="Previous Track" title="Previous Track" /></a>
