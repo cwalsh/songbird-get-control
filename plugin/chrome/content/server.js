@@ -130,7 +130,7 @@ songbird_GET_control.server = (function(){
 		* An object implementing nsIServerSocketListener
 		*/
 		_listener: {
-			_httpGetRegExp: new RegExp("^GET [^ ]+ HTTP/\\d+.\\d+$"),
+			_httpGetRegExp: new RegExp("^(GET|POST|HEAD) [^ ]+ HTTP/\\d+.\\d+$"),
 
 			onSocketAccepted: function(serverSocket, transport)
 			{
@@ -183,20 +183,21 @@ songbird_GET_control.server = (function(){
 					} else {
 						response_obj = server.GET(request, ostream);
 						if(response_obj == null) {
-							response_obj = {error:"unknown error"};
+							response_obj = {};
 						}
 						response_obj.version = server.ver;
 						var responseText = nativeJSON.encode(response_obj) + CRLF;
-						write("HTTP/1.1 200 OK" + CRLF +
+						var httpResponse = "HTTP/1.1 200 OK" + CRLF +
 									"Content-Type: text/plain" + CRLF +
 									"Content-Length: " + responseText.length + CRLF +
 									CRLF +
-									responseText);
+									responseText;
+						//log(httpResponse);
+						write(httpResponse);
 					}
 				} finally {
 					ostream.close();
 				}
-				log("request processed successfully");
 			},
 		
 			onStopListening: function(serverSocket, status) {
@@ -206,8 +207,11 @@ songbird_GET_control.server = (function(){
 
 		GET: function(req, ostream) {
 			//log("REQUEST: " + req);
-			var command = req.match(/GET \/ctl\/([^ ?]+)(\?[^ ]*)? /)[1];
-			log("GOT ctl command: " + command);
+			var match = req.match(/(\w+) \/ctl\/([^ ?]+)(\?[^ ]*)? /);
+			var method = match[1];
+			var command = match[2];
+			var query = match[3];
+			log("GOT ctl command: '" + command + "'");
 			var ret = controller[command]();
 			if(ret == null) {
 				ret = controller.status();

@@ -3,8 +3,8 @@ a img, a.img {
 }
 body {
 	background-color: rgb(220,220,220);
-	color: #645949;
-	font-family: georgia, serif;
+	color: #555;
+	font-family: helvetica, arial, sans-serif;
 	padding-left: 30px;
 	padding-top: 30px;
 }
@@ -12,54 +12,78 @@ a {
 	text-decoration: none;
 	color: #609799;
 	outline: none;
-}		
+}
 a:hover {
 	color: #8f7c47;
 }
 
+.detail {
+	padding-top:0.3em;
+	text-align:center;
+}
+
+.detail#error {
+	color:red;
+	font-size:2em;
+}
+
+.detail#track { color:#222; font-size:1.1em; }
+.detail#artist { color:#666; }
+.detail#album { color:#888; font-size:0.8em; }
+
+#controls {
+	width:300px;
+	margin-top:1em;
+	/*border:2px solid black;*/
+}
+
 .logo {
-display:block; 
-position: absolute; 
+display:block;
 margin-left: -35px;
 margin-top: -35px;
 }
 
-.playpausestop a {
-display:block; 
-width:40px; 
-height:40px; 
-overflow:hidden;
-float:left;
-position: relative; 
-padding-left: 3px;
+.buttons {
+	margin-left:53px;
 }
-.playpausestop a:hover img {
-margin-top:-40px;
+
+.buttons a {
+	overflow:hidden;
+	float:left;
+	position: relative;
+	display:block;
+	padding-left: 3px;
+}
+
+#trackinfo {
+clear:both;
+}
+
+.playpausestop a {
+	width:40px;
+	height:40px;
 }
 
 .nextprev a {
-display:block; 
-width:30px; 
-height:30px; 
-overflow:hidden;
-float:left; 
-position: relative; 
-top: 5px;
-padding-left: 3px;
+	width:30px;
+	height:30px;
+	top: 5px;
+	padding-left: 3px;
 }
-.nextprev a:hover img {
-margin-top:-30px;
+
+.volume {
+	position:absolute;
+	top:22px;
+	left: 103px;
 }
 
 .volume a {
-display:block; 
-width:16px; 
-height:16px; 
-overflow:hidden;
-float:left;
-position: relative; 
-top: 12px;
+	width:16px;
+	height:16px;
+	top: 12px;
 }
-.volume a:hover img {
-margin-left:-16px;
-}
+
+/* hover states */
+.playpausestop a:hover img { margin-top:-40px; }
+.nextprev a:hover img { margin-top:-30px; }
+.volume a:hover img { margin-left:-16px; }
