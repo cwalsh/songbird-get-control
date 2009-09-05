@@ -102,7 +102,7 @@ songbird_GET_control.server = (function(){
 		_id: Math.round(Math.random() * 1000),
 		_socket: null,
 		port: 50136,
-		ver: "0.1",
+		ver: "0.3",
 
 		start: function() {
 			server.port = Application.prefs.get("extensions.GET-control.port").value;
