@@ -1,3 +1,5 @@
+Components.utils.import("resource://app/jsmodules/sbProperties.jsm");
+
 if (typeof(songbird_GET_control) == "undefined") {
 	var songbird_GET_control = {
 		log: function(msg) {
@@ -22,6 +24,21 @@ songbird_GET_control.controller = function(){
 		// core() returns the sbIMediacoreManager instance.
 		play: function() {
 			core().playbackControl.play();
+		},
+
+		status: function() {
+			var c = core();
+			var playing = c.status.state == 1;
+			var mediaItem = c.sequencer.view.getItemByIndex(c.sequencer.viewPosition);
+			var st = {
+				playing: playing,
+			};
+			if(mediaItem) {
+				st.artist = mediaItem.getProperty(SBProperties.artistName);
+				st.album = mediaItem.getProperty(SBProperties.albumName);
+				st.track = mediaItem.getProperty(SBProperties.trackName);
+			}
+			return st;
 		},
 
 		next: function() {
@@ -79,6 +96,8 @@ songbird_GET_control.controller = function(){
 songbird_GET_control.server = (function(){
 	var log = songbird_GET_control.log;
 	var controller = songbird_GET_control.controller;
+	var nativeJSON = Cc["@mozilla.org/dom/json;1"].createInstance(Ci.nsIJSON);
+	
 	var server = {
 		_id: Math.round(Math.random() * 1000),
 		_socket: null,
@@ -156,16 +175,23 @@ songbird_GET_control.server = (function(){
 				try { // todo: test various errors handling
 					if(!headerRead) {
 						log("timeout");
-						log("read " + request.length + " bytes: " + request + 
-														 "; headerRead=" + headerRead + 
-														 "; isAlive=" + transport.isAlive() + 
-														 "; n=" + n);
+						log("read " + request.length + " bytes: " + request +
+							"; headerRead=" + headerRead +
+							"; isAlive=" + transport.isAlive() +
+							"; n=" + n);
 						write("HTTP/1.1 408 Request Time-out" + END_OF_HEADER);
 					} else {
-						server.GET(request, ostream);
+						response_obj = server.GET(request, ostream);
+						if(response_obj == null) {
+							response_obj = {error:"unknown error"};
+						}
+						response_obj.version = server.ver;
+						var responseText = nativeJSON.encode(response_obj) + CRLF;
 						write("HTTP/1.1 200 OK" + CRLF +
-									"Content-type: text/plain" + CRLF + CRLF +
-									"Songbird server #" + server._id + ".");
+									"Content-Type: text/plain" + CRLF +
+									"Content-Length: " + responseText.length + CRLF +
+									CRLF +
+									responseText);
 					}
 				} finally {
 					ostream.close();
@@ -179,26 +205,14 @@ songbird_GET_control.server = (function(){
 
 
 		GET: function(req, ostream) {
-			var CRLF = "\r\n", OK = "OK", ver = server.ver;
-			var outString;
-
-			// helpers
-			var o = {
-				req: req, // parsed request
-
-				// basic
-				stream: ostream,
-				write: function(s) { return server.stream.write(s, s.length); },
-
-				fail: function(reason) {
-					server.write("FAIL");
-					if(reason) server.write(": " + reason);
-				}
-			};
 			//log("REQUEST: " + req);
-			var command = req.match(/GET \/ctl\/([^ ]+) /)[1];
+			var command = req.match(/GET \/ctl\/([^ ?]+)(\?[^ ]*)? /)[1];
 			log("GOT ctl command: " + command);
-			controller[command]();
+			var ret = controller[command]();
+			if(ret == null) {
+				ret = controller.status();
+			}
+			return ret;
 		},
 	};
 	return server;
